@@ -74,6 +74,10 @@ const handleSendMessage = async (textFromInput) => {
 
   return (
     <div className="flex flex-col h-screen bg-violet-300 text-white">
+      <div className="font-bold flex  justify-center text-violet-950  ">
+    Teletraan-1
+
+    </div>
       {/* Message List Area */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col space-y-2">
