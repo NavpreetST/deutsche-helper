@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
+
 // Initialize the Google AI client. 
 // The library automatically finds the GEMINI_API_KEY in your .env.local file.
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);

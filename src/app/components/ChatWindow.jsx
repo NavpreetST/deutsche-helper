@@ -6,30 +6,9 @@ import Input from './Input';
 const ChatWindow = () => {
     
     
-    const temporaryMessages = [
-        {
-            id: 'msg1',
-            text: 'Hello there! How can I help you today?',
-            sender: 'bot'
-        },
-        {
-            id: 'msg2',
-            text: 'I need some information about your services.',
-            sender: 'user'
-        },
-        {
-            id: 'msg3',
-            text: 'Certainly! We offer a variety of services including web development, mobile app development, and cloud solutions. What specifically are you interested in?',
-            sender: 'bot'
-        },
-        {
-            id: 'msg4',
-            text: 'Tell me more about web development.',
-            sender: 'user'
-        }
-    ];
     
-    const [messages, setMessages] = useState(temporaryMessages);
+    
+    const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage]= useState();
 
 
@@ -99,7 +78,7 @@ const handleSendMessage = async (textFromInput) => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col space-y-2">
           {/* Messages will be mapped here */}
-          {messages.map((message) => (
+          {messages?.map((message) => (
             <div
               key={message.id}
               className={`p-2 rounded-lg max-w-lg ${
