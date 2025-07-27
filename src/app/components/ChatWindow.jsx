@@ -9,9 +9,10 @@ const ChatWindow = () => {
     
     
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage]= useState();
+    
 
 
+    
    // In ChatWindow.js
 
 const handleSendMessage = async (textFromInput) => {
@@ -37,16 +38,50 @@ const handleSendMessage = async (textFromInput) => {
     if (!response.ok) {
       throw new Error(`API error: ${response.statusText}`);
     }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
 
-    const data = await response.json();
+    // const data = await response.json();
+
+
+    const botMessageID = `bot-msg-${Date.now() +1}`
     const botMessage = {
-      id: `msg${Date.now() + 1}`,
-      text: data.reply, // Use the reply from the API
+      id: `${botMessageID}`,
+      text: "", // Use the reply from the API
       sender: 'bot'
     };
+    setMessages(prevMessages => [...prevMessages, botMessage]);
+
+
+
+    while (true) {
+
+
+
+      const {value, done} = await reader.read();
+      
+      if(done){
+        break;
+      }
+      const chunk = decoder.decode(value)
+      
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => {
+          if (msg.id === botMessageID) {
+            // This is the one we want to update!
+            // Return a NEW object with the updated text.
+            return { ...msg, text: msg.text + chunk };
+          } else {
+            // This is not the message we're looking for.
+            // Return it unchanged.
+            return msg;
+          }
+        })
+      );
+    }
 
     // 3. Add the bot's response to the chat
-    setMessages(prevMessages => [...prevMessages, botMessage]);
+    // setMessages(prevMessages => [...prevMessages, botMessage]);
 
   } catch (error) {
     console.error("Failed to send message:", error);
@@ -56,21 +91,10 @@ const handleSendMessage = async (textFromInput) => {
       text: 'Sorry, something went wrong. Please try again.',
       sender: 'bot'
     };
-    setMessages(prevMessages => [...prevMessages, errorMessage]);
+
   }
 };
-    // const handleSendMessages = (textFromInput) =>{
-    //     console.log(textFromInput)
-    //     const newMessage = {
-    //         id: `msg${messages.length + 1}`,
-    //         text: textFromInput,
-    //         sender: 'user'
-    //     }
-    //     setMessages([...messages, newMessage]);
-    //     setNewMessage(null);
-    //     console.log(messages)
-    // }
-
+   
 
   return (
     <div className="flex flex-col h-screen bg-violet-300 text-white">
