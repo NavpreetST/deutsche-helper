@@ -100,22 +100,21 @@ const handleSendMessage = async (textFromInput) => {
    
 
   return (
-    <div className="flex flex-col h-screen bg-violet-300 text-white">
-      <div className="font-bold flex  justify-center text-violet-950  ">
-    Teletraan-1
-
-    </div>
+    <div className="flex flex-col flex-1 h-full bg-[#171717] text-white">
+      <div className="font-bold flex justify-center text-[#F5F5F5] text-2xl p-4 border-b border-[#2E2E2E]">
+        Teletraan-1
+      </div>
       {/* Message List Area */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="flex flex-col space-y-2">
+      <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex flex-col space-y-4">
           {/* Messages will be mapped here */}
           {messages?.map((message) => (
             <div
               key={message.id}
-              className={`p-2 rounded-lg max-w-lg ${
+              className={`p-3 rounded-lg max-w-lg ${
                 message.sender === "user"
-                  ? "bg-blue-300 self-end"
-                  : "bg-gray-500 self-start"
+                  ? "bg-[#8A42F4] text-white self-end rounded-br-none"
+                  : "bg-[#212121] text-[#F5F5F5] self-start rounded-bl-none"
               }`}
             >
               <p>{message.text}</p>
@@ -125,7 +124,7 @@ const handleSendMessage = async (textFromInput) => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4">
+      <div className="p-4 border-t border-[#2E2E2E]">
         <Input onSendMessage={handleSendMessage} />
       </div>
     </div>
