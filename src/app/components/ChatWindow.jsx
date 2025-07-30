@@ -9,6 +9,9 @@ const ChatWindow = () => {
     
     
     const [messages, setMessages] = useState([]);
+
+    const [latestMessage, setLatestMessage] = useState(null);
+
     
 
 

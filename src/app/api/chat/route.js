@@ -20,7 +20,13 @@ export async function POST(request) {
       }
 
   // Select the model (this is the same)
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash",
+    config: {
+      thinkingConfig :{
+        thinkingBudget : 0,
+      }
+    },
+   });
 
   // Get the stream from the AI (this is the same)
   const result = await model.generateContentStream([message]);
