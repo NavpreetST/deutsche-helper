@@ -23,6 +23,9 @@ const Input = ({ onSendMessage }) => {
       };
       recognition.onend = () => {
         setIsListening(false);
+        if (recognitionRef.current) {
+          onSendMessage(inputValue);
+        }
       };
       recognition.start();
       setIsListening(true);
@@ -70,6 +73,7 @@ const Input = ({ onSendMessage }) => {
         </svg>
       </motion.button>
       <motion.button
+        type="button"
         className="p-2 rounded-full text-[#A3A3A3] hover:bg-[#313131]"
         onClick={handleListen}
         whileHover={{ scale: 1.1 }}
