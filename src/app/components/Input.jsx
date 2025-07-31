@@ -38,7 +38,7 @@ const Input = ({ onSendMessage }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center w-full p-2 rounded-full bg-[#212121] border border-[#2E2E2E]"
+      className="flex items-center w-full p-2 rounded-full bg-[#212121]"
     >
       <input
         type="text"
