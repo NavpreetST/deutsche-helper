@@ -1,18 +1,56 @@
 
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatWindow from "./components/ChatWindow";
 import SideBar from "./components/SideBar";
 
 const NEW_CHAT_ID = 'new';
 
 function App() {
-  const [conversations, setConversations] = useState([
-    { id: 1, title: 'First Chat', messages: [{id: 1, text: "hello"}] },
-    { id: 2, title: 'Second Chat', messages: [] },
-    { id: 3, title: 'Third Chat', messages: [] },
-  ]);
-  const [activeConversation, setActiveConversation] = useState(conversations[0]);
+  const [conversations, setConversations] = useState([]);
+  const [activeConversation, setActiveConversation] = useState(null);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const response = await fetch('/api/conversations');
+        const data = await response.json();
+        if (data.success) {
+          setConversations(data.data);
+          if (data.data.length > 0) {
+            setActiveConversation(data.data[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch conversations:', error);
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (activeConversation && activeConversation._id) {
+        try {
+          const response = await fetch(`/api/messages?conversationId=${activeConversation._id}`);
+          const data = await response.json();
+          if (data.success) {
+            const updatedConversations = conversations.map((conv) =>
+              conv._id === activeConversation._id
+                ? { ...conv, messages: data.data }
+                : conv
+            );
+            setConversations(updatedConversations);
+          }
+        } catch (error) {
+          console.error('Failed to fetch messages:', error);
+        }
+      }
+    };
+
+    fetchMessages();
+  }, [activeConversation]);
 
   const handleSelectConversation = (conversation) => {
     setActiveConversation(conversation);
@@ -22,27 +60,84 @@ function App() {
     setActiveConversation({ id: NEW_CHAT_ID, title: 'New Chat', messages: [] });
   };
 
-  const handleSendMessage = (text) => {
-    const newMessage = { id: Date.now(), text, sender: 'user' };
+  const handleSendMessage = async (text) => {
+    let currentConversation = activeConversation;
 
-    if (activeConversation.id === NEW_CHAT_ID) {
+    if (currentConversation.id === NEW_CHAT_ID) {
       // Create a new conversation
-      const newConversation = {
-        id: Date.now(),
-        title: text.substring(0, 20), // Use the first 20 chars as title
-        messages: [newMessage],
-      };
-      setConversations([newConversation, ...conversations]);
-      setActiveConversation(newConversation);
-    } else {
-      // Add message to the active conversation
+      const response = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: text.substring(0, 20) }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        currentConversation = data.data;
+        setConversations([currentConversation, ...conversations]);
+        setActiveConversation(currentConversation);
+      }
+    }
+
+    const userMessage = {
+      conversationId: currentConversation._id,
+      text,
+      sender: 'user',
+    };
+
+    // Save the user's message
+    await fetch('/api/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userMessage),
+    });
+
+    // Get the bot's response
+    const botResponse = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: text }),
+    });
+
+    const reader = botResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let botText = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      botText += decoder.decode(value);
+    }
+
+    const botMessage = {
+      conversationId: currentConversation._id,
+      text: botText,
+      sender: 'bot',
+    };
+
+    // Save the bot's message
+    await fetch('/api/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(botMessage),
+    });
+
+    // Refresh messages for the active conversation
+    const response = await fetch(`/api/messages?conversationId=${currentConversation._id}`);
+    const data = await response.json();
+    if (data.success) {
       const updatedConversations = conversations.map((conv) =>
-        conv.id === activeConversation.id
-          ? { ...conv, messages: [...conv.messages, newMessage] }
+        conv._id === currentConversation._id
+          ? { ...conv, messages: data.data }
           : conv
       );
       setConversations(updatedConversations);
-      setActiveConversation(updatedConversations.find(c => c.id === activeConversation.id));
     }
   };
 
@@ -54,10 +149,12 @@ function App() {
         activeConversation={activeConversation}
         onNewChat={handleNewChat}
       />
-      <ChatWindow 
-        conversation={activeConversation} 
-        onSendMessage={handleSendMessage} 
-      />
+      {activeConversation && (
+        <ChatWindow 
+          conversation={activeConversation} 
+          onSendMessage={handleSendMessage} 
+        />
+      )}
     </div>
   );
 }
