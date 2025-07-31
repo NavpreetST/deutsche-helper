@@ -58,10 +58,15 @@ const Input = ({ onSendMessage }) => {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009.82 16.57l4.982-1.424a1 1 0 00.992-.992l-1.424-4.982a1 1 0 00-1.403-.39l-1.428 5a1 1 0 001.409 1.169l7-14a1 1 0 000-1.788l-14-7z" />
+          <path d="M22 2L11 13" />
+          <path d="M22 2L15 22L11 13L2 9L22 2z" />
         </svg>
       </motion.button>
       <motion.button
