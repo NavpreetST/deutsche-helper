@@ -1,105 +1,107 @@
 "use client"
-import React from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react';
 import Input from './Input';
-
 import FormattedText from './FormattedText';
 
 const ChatWindow = () => {
-    
-    
-    
-    
-    const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
 
-    const [latestMessage, setLatestMessage] = useState(null);
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('/api/messages');
+        const data = await response.json();
+        if (data.success) {
+          setMessages(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch messages:', error);
+      }
+    };
 
-    
+    fetchMessages();
+  }, []);
 
+  const handleSendMessage = async (textFromInput) => {
+    const userMessage = {
+      text: textFromInput,
+      sender: 'user',
+    };
 
-    
-   // In ChatWindow.js
+    // Immediately update the UI with the user's message
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-const handleSendMessage = async (textFromInput) => {
-  // console.log("ChatWindow.js: Received this value:", textFromInput);
-  // 1. Immediately add the user's message to the chat
-  const userMessage = {
-    id: `msg${Date.now()}`, // Using timestamp for a more unique ID
-    text: textFromInput,
-    sender: 'user'
-  };
-  setMessages(prevMessages => [...prevMessages, userMessage]);
-
-  try {
-    // 2. Send the user's message to our new API endpoint
-    const response = await fetch('/api/chat', {
+    // Save the user's message to the database
+    await fetch('/api/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message: textFromInput }), // Send in the expected format
+      body: JSON.stringify(userMessage),
     });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.statusText}`);
-    }
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+    try {
+      // Get the bot's response
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: textFromInput }),
+      });
 
-    // const data = await response.json();
-
-
-    const botMessageID = `bot-msg-${Date.now() +1}`
-    const botMessage = {
-      id: `${botMessageID}`,
-      text: "", // Use the reply from the API
-      sender: 'bot'
-    };
-    setMessages(prevMessages => [...prevMessages, botMessage]);
-
-
-
-    while (true) {
-
-
-
-      const {value, done} = await reader.read();
-      
-      if(done){
-        break;
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
       }
-      const chunk = decoder.decode(value)
-      
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) => {
-          if (msg.id === botMessageID) {
-            // This is the one we want to update!
-            // Return a NEW object with the updated text.
-            return { ...msg, text: msg.text + chunk };
-          } else {
-            // This is not the message we're looking for.
-            // Return it unchanged.
-            return msg;
-          }
-        })
-      );
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let botResponse = '';
+
+      const botMessageID = `bot-msg-${Date.now()}`;
+      const botMessage = {
+        id: botMessageID,
+        text: "",
+        sender: 'bot',
+      };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          break;
+        }
+        const chunk = decoder.decode(value);
+        botResponse += chunk;
+
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.id === botMessageID
+              ? { ...msg, text: botResponse }
+              : msg
+          )
+        );
+      }
+
+      // Save the bot's message to the database
+      await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: botResponse, sender: 'bot' }),
+      });
+
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      const errorMessage = {
+        id: `err${Date.now()}`,
+        text: 'Sorry, something went wrong. Please try again.',
+        sender: 'bot',
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     }
-
-    // 3. Add the bot's response to the chat
-    // setMessages(prevMessages => [...prevMessages, botMessage]);
-
-  } catch (error) {
-    console.error("Failed to send message:", error);
-    // Optional: Add an error message to the chat UI
-    const errorMessage = {
-      id: `err${Date.now()}`,
-      text: 'Sorry, something went wrong. Please try again.',
-      sender: 'bot'
-    };
-
-  }
-};
-   
+  };
 
   return (
     <div className="flex flex-col flex-1 h-full bg-[#171717] text-white">
@@ -109,10 +111,9 @@ const handleSendMessage = async (textFromInput) => {
       {/* Message List Area */}
       <div className="flex-1 overflow-y-auto p-8">
         <div className="flex flex-col space-y-4">
-          {/* Messages will be mapped here */}
-          {messages?.map((message) => (
+          {messages?.map((message, index) => (
             <div
-              key={message.id}
+              key={message._id || index}
               className={`p-3 rounded-lg max-w-lg ${
                 message.sender === "user"
                   ? "bg-[#8A42F4] text-white self-end rounded-br-none"
@@ -131,6 +132,6 @@ const handleSendMessage = async (textFromInput) => {
       </div>
     </div>
   );
-}
+};
 
-export default ChatWindow
+export default ChatWindow;
