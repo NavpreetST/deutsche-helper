@@ -31,17 +31,12 @@ function App() {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (activeConversation && activeConversation._id) {
+      if (activeConversation && activeConversation._id && !activeConversation.messages) {
         try {
           const response = await fetch(`/api/messages?conversationId=${activeConversation._id}`);
           const data = await response.json();
           if (data.success) {
-            const updatedConversations = conversations.map((conv) =>
-              conv._id === activeConversation._id
-                ? { ...conv, messages: data.data }
-                : conv
-            );
-            setConversations(updatedConversations);
+            setActiveConversation(prev => ({ ...prev, messages: data.data }));
           }
         } catch (error) {
           console.error('Failed to fetch messages:', error);
@@ -62,83 +57,69 @@ function App() {
 
   const handleSendMessage = async (text) => {
     let currentConversation = activeConversation;
+    const userMessage = { text, sender: 'user' };
+
+    // Optimistic update for user message
+    setActiveConversation(prev => ({ ...prev, messages: [...(prev.messages || []), userMessage] }));
 
     if (currentConversation.id === NEW_CHAT_ID) {
-      // Create a new conversation
       const response = await fetch('/api/conversations', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: text.substring(0, 20) }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: text.substring(0, 30) }),
       });
       const data = await response.json();
       if (data.success) {
         currentConversation = data.data;
+        currentConversation.messages = [userMessage]; // Add the first message
         setConversations([currentConversation, ...conversations]);
         setActiveConversation(currentConversation);
+      } else {
+        // Handle error - maybe show a toast notification
+        return;
       }
     }
 
-    const userMessage = {
-      conversationId: currentConversation._id,
-      text,
-      sender: 'user',
-    };
-
-    // Save the user's message
+    // Save user message to DB
     await fetch('/api/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userMessage),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...userMessage, conversationId: currentConversation._id }),
     });
 
-    // Get the bot's response
-    const botResponse = await fetch('/api/chat', {
+    // Get bot response
+    const botResponseStream = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text }),
     });
 
-    const reader = botResponse.body.getReader();
+    const reader = botResponseStream.body.getReader();
     const decoder = new TextDecoder();
     let botText = '';
+    const botMessage = { text: '', sender: 'bot' };
+    
+    // Optimistic update for bot message placeholder
+    setActiveConversation(prev => ({ ...prev, messages: [...prev.messages, botMessage] }));
+
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
       botText += decoder.decode(value);
+      setActiveConversation(prev => ({
+        ...prev,
+        messages: prev.messages.map((msg, index) => 
+          index === prev.messages.length - 1 ? { ...msg, text: botText } : msg
+        ),
+      }));
     }
 
-    const botMessage = {
-      conversationId: currentConversation._id,
-      text: botText,
-      sender: 'bot',
-    };
-
-    // Save the bot's message
+    // Save final bot message to DB
     await fetch('/api/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(botMessage),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: botText, sender: 'bot', conversationId: currentConversation._id }),
     });
-
-    // Refresh messages for the active conversation
-    const response = await fetch(`/api/messages?conversationId=${currentConversation._id}`);
-    const data = await response.json();
-    if (data.success) {
-      const updatedConversations = conversations.map((conv) =>
-        conv._id === currentConversation._id
-          ? { ...conv, messages: data.data }
-          : conv
-      );
-      setConversations(updatedConversations);
-    }
   };
 
   return (
