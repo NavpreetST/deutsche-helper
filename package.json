@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest"
   },
   "dependencies": {
     "@google/genai": "^1.11.0",
@@ -21,9 +22,16 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
     "@types/react": "19.1.8",
+    "@vitejs/plugin-react": "^4.7.0",
+    "dotenv": "^17.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.4.4",
-    "tailwindcss": "^4"
+    "jest-environment-jsdom": "^30.0.5",
+    "jsdom": "^26.1.0",
+    "tailwindcss": "^4",
+    "vitest": "^3.2.4"
   }
 }

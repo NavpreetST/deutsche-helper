@@ -9,7 +9,7 @@ export async function GET() {
     const conversations = await Conversation.find({ userId: 'admin' }).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, data: conversations });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
@@ -21,6 +21,6 @@ export async function POST(req) {
     const conversation = await Conversation.create({ ...body, userId: 'admin' });
     return NextResponse.json({ success: true, data: conversation }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
