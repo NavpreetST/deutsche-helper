@@ -3,7 +3,7 @@ import React from 'react';
 import Input from './Input';
 import FormattedText from './FormattedText';
 
-const ChatWindow = ({ conversation }) => {
+const ChatWindow = ({ conversation, onSendMessage }) => {
   return (
     <div className="flex flex-col flex-1 h-full bg-[#171717] text-white">
       <div className="font-bold flex justify-center text-[#F5F5F5] text-2xl p-4 border-b border-[#2E2E2E]">
@@ -29,7 +29,7 @@ const ChatWindow = ({ conversation }) => {
 
       {/* Input Area */}
       <div className="p-4 border-t border-[#2E2E2E]">
-        <Input onSendMessage={() => {}} />
+        <Input onSendMessage={onSendMessage} />
       </div>
     </div>
   );
