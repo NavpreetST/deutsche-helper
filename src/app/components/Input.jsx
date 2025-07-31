@@ -23,9 +23,6 @@ const Input = ({ onSendMessage }) => {
       };
       recognition.onend = () => {
         setIsListening(false);
-        if (recognitionRef.current) {
-          onSendMessage(inputValue);
-        }
       };
       recognition.start();
       setIsListening(true);
