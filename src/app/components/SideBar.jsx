@@ -13,10 +13,10 @@ const SideBar = ({ conversations, onSelectConversation, activeConversation, onNe
       <div className="flex-1 overflow-y-auto">
         {conversations.map((conversation) => (
           <div
-            key={conversation.id}
+            key={conversation._id}
             className={`p-3 rounded-lg text-white cursor-pointer ${
-              activeConversation && activeConversation.id === conversation.id ? 'bg-[#212121]' : 'hover:bg-[#212121]'
-            }`}
+              activeConversation && activeConversation._id === conversation._id ? 'bg-[#212121]' : 'hover:bg-[#212121]'
+            }`}}
             onClick={() => onSelectConversation(conversation)}
           >
             {conversation.title}
