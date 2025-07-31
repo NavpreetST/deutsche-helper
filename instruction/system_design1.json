@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "systemName": "Teletraan UI v2",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "colorPalette": {
+      "background": "#0D0D0D",
+      "panel": {
+        "primary": "#171717",
+        "secondary": "#212121"
+      },
+      "border": "#2E2E2E",
+      "text": {
+        "primary": "#F5F5F5",
+        "secondary": "#A3A3A3",
+        "tertiary": "#737373"
+      },
+      "accent": {
+        "primary": "#8A42F4",
+        "primary_hover": "#772CE8",
+        "secondary": "#EA4D6D"
+      },
+      "system": {
+        "success": "#34D399",
+        "warning": "#FBBF24",
+        "error": "#F87171"
+      }
+    },
+    "typography": {
+      "fonts": {
+        "sans": "'Inter', sans-serif",
+        "mono": "'Roboto Mono', monospace"
+      },
+      "weights": {
+        "regular": 400,
+        "medium": 500,
+        "bold": 700
+      }
+    },
+    "effects": {
+      "borderRadius": {
+        "sm": "4px",
+        "md": "8px",
+        "lg": "12px",
+        "full": "9999px"
+      },
+      "boxShadow": {
+        "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
+      }
+    },
+    "spacing": {
+      "baseUnit": "4px",
+      "scale": {
+        "xs": "4px",
+        "sm": "8px",
+        "md": "16px",
+        "lg": "24px",
+        "xl": "32px",
+        "2xl": "48px"
+      }
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": {
+        "background": "accent.primary",
+        "text": "#FFFFFF",
+        "hoverBackground": "accent.primary_hover"
+      },
+      "secondary": {
+        "background": "panel.secondary",
+        "text": "text.primary",
+        "border": "border",
+        "hoverBackground": "#313131"
+      },
+      "ghost": {
+        "background": "transparent",
+        "text": "text.secondary",
+        "hoverBackground": "panel.primary"
+      }
+    },
+    "chatMessage": {
+      "container": {
+        "gap": "12px"
+      },
+      "bubble": {
+        "padding": "12px 16px",
+        "maxWidth": "80%"
+      },
+      "user": {
+        "background": "accent.primary",
+        "textColor": "#FFFFFF",
+        "borderRadius": "lg lg 0 lg",
+        "alignment": "flex-end"
+      },
+      "ai": {
+        "background": "panel.primary",
+        "textColor": "text.primary",
+        "borderRadius": "lg lg lg 0",
+        "alignment": "flex-start"
+      }
+    },
+    "codeBlock": {
+      "background": "background",
+      "textColor": "text.secondary",
+      "padding": "16px",
+      "borderRadius": "md",
+      "borderColor": "border"
+    },
+    "sidebar": {
+      "background": "background",
+      "borderColor": "border",
+      "width": "260px"
+    },
+    "mainContent": {
+      "padding": "32px"
+    }
+  }
+}
