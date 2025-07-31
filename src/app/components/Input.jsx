@@ -45,7 +45,7 @@ const Input = ({ onSendMessage }) => {
         placeholder="Enter your text"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className="flex-1 bg-transparent text-white placeholder-gray-400 border-none focus:ring-0"
+        className="flex-1 bg-transparent text-white placeholder-gray-400 border-none focus:outline-none"
       />
 
       <motion.button
