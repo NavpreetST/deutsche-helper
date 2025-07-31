@@ -6,37 +6,37 @@ import SideBar from "./components/SideBar";
 const NEW_CHAT_ID = 'new';
 
 function App() {
-  const [conversations, setConversations] = useState([]);
-  const [activeConversation, setActiveConversation] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [activeChat, setActiveChat] = useState(null);
   const [chatWindowKey, setChatWindowKey] = useState(Date.now());
 
   useEffect(() => {
-    const fetchConversations = async () => {
+    const fetchChats = async () => {
       try {
-        const response = await fetch('/api/conversations');
+        const response = await fetch('/api/chats');
         const data = await response.json();
         if (data.success) {
-          setConversations(data.data);
+          setChats(data.data);
           if (data.data.length > 0) {
-            setActiveConversation(data.data[0]);
+            setActiveChat(data.data[0]);
           }
         }
       } catch (error) {
-        console.error('Failed to fetch conversations:', error);
+        console.error('Failed to fetch chats:', error);
       }
     };
 
-    fetchConversations();
+    fetchChats();
   }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (activeConversation && activeConversation._id && !activeConversation.messages) {
+      if (activeChat && activeChat._id && !activeChat.messages) {
         try {
-          const response = await fetch(`/api/messages?conversationId=${activeConversation._id}`);
+          const response = await fetch(`/api/chats/${activeChat._id}`);
           const data = await response.json();
           if (data.success) {
-            setActiveConversation(prev => ({ ...prev, messages: data.data }));
+            setActiveChat(data.data);
           }
         } catch (error) {
           console.error('Failed to fetch messages:', error);
@@ -45,48 +45,39 @@ function App() {
     };
 
     fetchMessages();
-  }, [activeConversation]);
+  }, [activeChat]);
 
-  const handleSelectConversation = (conversation) => {
-    setActiveConversation(conversation);
+  const handleSelectChat = (chat) => {
+    setActiveChat(chat);
   };
 
   const handleNewChat = () => {
-    setActiveConversation({ id: NEW_CHAT_ID, title: 'New Chat', messages: [] });
+    setActiveChat({ id: NEW_CHAT_ID, title: 'New Chat', messages: [] });
     setChatWindowKey(Date.now());
   };
 
   const handleSendMessage = async (text) => {
-    let currentConversation = activeConversation;
+    let currentChat = activeChat;
     const userMessage = { text, sender: 'user' };
 
     // Optimistic update for user message
-    setActiveConversation(prev => ({ ...prev, messages: [...(prev.messages || []), userMessage] }));
+    setActiveChat(prev => ({ ...prev, messages: [...(prev.messages || []), userMessage] }));
 
-    if (currentConversation.id === NEW_CHAT_ID) {
-      const response = await fetch('/api/conversations', {
+    if (currentChat.id === NEW_CHAT_ID) {
+      const response = await fetch('/api/chats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: text.substring(0, 30) }),
+        body: JSON.stringify({ title: text.substring(0, 30), messages: [userMessage] }),
       });
       const data = await response.json();
       if (data.success) {
-        currentConversation = data.data;
-        currentConversation.messages = [userMessage]; // Add the first message
-        setConversations([currentConversation, ...conversations]);
-        setActiveConversation(currentConversation);
+        currentChat = data.data;
+        setChats([currentChat, ...chats]);
+        setActiveChat(currentChat);
       } else {
-        // Handle error - maybe show a toast notification
         return;
       }
     }
-
-    // Save user message to DB
-    await fetch('/api/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...userMessage, conversationId: currentConversation._id }),
-    });
 
     // Get bot response
     const botResponseStream = await fetch('/api/chat', {
@@ -101,13 +92,13 @@ function App() {
     const botMessage = { text: '', sender: 'bot' };
     
     // Optimistic update for bot message placeholder
-    setActiveConversation(prev => ({ ...prev, messages: [...prev.messages, botMessage] }));
+    setActiveChat(prev => ({ ...prev, messages: [...prev.messages, botMessage] }));
 
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
       botText += decoder.decode(value);
-      setActiveConversation(prev => ({
+      setActiveChat(prev => ({
         ...prev,
         messages: prev.messages.map((msg, index) => 
           index === prev.messages.length - 1 ? { ...msg, text: botText } : msg
@@ -116,25 +107,27 @@ function App() {
     }
 
     // Save final bot message to DB
-    await fetch('/api/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: botText, sender: 'bot', conversationId: currentConversation._id }),
-    });
+    await fetch(`/api/chats/${currentChat._id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: botText, sender: 'bot' }),
+      }
+    );
   };
 
   return (
     <div className="flex h-screen overflow-hidden">
       <SideBar
-        conversations={conversations}
-        onSelectConversation={handleSelectConversation}
-        activeConversation={activeConversation}
+        conversations={chats}
+        onSelectConversation={handleSelectChat}
+        activeConversation={activeChat}
         onNewChat={handleNewChat}
       />
-      {activeConversation && (
+      {activeChat && (
         <ChatWindow 
           key={chatWindowKey}
-          conversation={activeConversation} 
+          conversation={activeChat} 
           onSendMessage={handleSendMessage} 
         />
       )}
