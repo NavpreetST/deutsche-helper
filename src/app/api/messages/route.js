@@ -3,6 +3,7 @@ import Chat from '@/models/chat.model';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  console.log("GET /api/messages");
   await dbConnect();
 
   try {
@@ -14,6 +15,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  console.log("POST /api/messages");
   await dbConnect();
 
   try {
