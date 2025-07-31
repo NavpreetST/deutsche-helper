@@ -3,6 +3,8 @@ import React from 'react'
 import { useState } from 'react'
 import Input from './Input';
 
+import FormattedText from './FormattedText';
+
 const ChatWindow = () => {
     
     
@@ -117,7 +119,7 @@ const handleSendMessage = async (textFromInput) => {
                   : "bg-[#212121] text-[#F5F5F5] self-start rounded-bl-none"
               }`}
             >
-              <p>{message.text}</p>
+              <FormattedText text={message.text} />
             </div>
           ))}
         </div>
