@@ -12,6 +12,7 @@ export async function GET(req, { params }) {
     }
     return NextResponse.json({ success: true, data: chat });
   } catch (error) {
+    console.error("Error fetching chat:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -31,6 +32,7 @@ export async function PUT(req, { params }) {
     }
     return NextResponse.json({ success: true, data: chat });
   } catch (error) {
+    console.error("Error updating chat:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

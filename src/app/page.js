@@ -77,6 +77,15 @@ function App() {
       } else {
         return;
       }
+    } else {
+      // Save user message to DB
+      await fetch(`/api/chats/${currentChat._id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userMessage),
+        }
+      );
     }
 
     // Get bot response

@@ -21,6 +21,7 @@ export async function POST(req) {
     const chat = await Chat.create({ ...body, userId: 'admin' });
     return NextResponse.json({ success: true, data: chat }, { status: 201 });
   } catch (error) {
+    console.error("Error creating chat:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
