@@ -9,6 +9,7 @@ const NEW_CHAT_ID = 'new';
 function App() {
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
+  const [chatWindowKey, setChatWindowKey] = useState(Date.now());
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -53,6 +54,7 @@ function App() {
 
   const handleNewChat = () => {
     setActiveConversation({ id: NEW_CHAT_ID, title: 'New Chat', messages: [] });
+    setChatWindowKey(Date.now());
   };
 
   const handleSendMessage = async (text) => {
@@ -132,6 +134,7 @@ function App() {
       />
       {activeConversation && (
         <ChatWindow 
+          key={chatWindowKey}
           conversation={activeConversation} 
           onSendMessage={handleSendMessage} 
         />

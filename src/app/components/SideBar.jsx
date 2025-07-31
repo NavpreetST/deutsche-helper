@@ -16,9 +16,9 @@ const SideBar = ({ conversations, onSelectConversation, activeConversation, onNe
             key={conversation._id}
             className={`p-3 rounded-lg text-white cursor-pointer ${
               activeConversation && activeConversation._id === conversation._id ? 'bg-[#212121]' : 'hover:bg-[#212121]'
-            }`}}
-            onClick={() => onSelectConversation(conversation)}
-          >
+            }`}
+            onClick={() => onSelectConversation(conversation)}>
+          
             {conversation.title}
           </div>
         ))}
