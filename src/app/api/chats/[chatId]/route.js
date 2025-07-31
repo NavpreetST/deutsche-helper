@@ -3,10 +3,11 @@ import Chat from '@/models/chat.model';
 import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
+  const { chatId } = params;
   await dbConnect();
 
   try {
-    const chat = await Chat.findById(params.chatId);
+    const chat = await Chat.findById(chatId);
     if (!chat) {
       return NextResponse.json({ success: false, error: 'Chat not found' }, { status: 404 });
     }
@@ -18,12 +19,13 @@ export async function GET(req, { params }) {
 }
 
 export async function PUT(req, { params }) {
+  const { chatId } = params;
   await dbConnect();
 
   try {
     const body = await req.json();
     const chat = await Chat.findByIdAndUpdate(
-      params.chatId,
+      chatId,
       { $push: { messages: body } },
       { new: true, runValidators: true }
     );
